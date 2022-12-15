@@ -10,8 +10,8 @@ def cls():
     _ = call('clear' if os.name == 'posix' else 'cls')
 
 def accounts():
-	if os.path.isfile("accounts.pickle") == True:
-		with open("accounts.pickle", "rb") as accounts:
+	if os.path.isfile("accounts.bin") == True:
+		with open("accounts.bin", "rb") as accounts:
 			accounts_dict = pickle.load(accounts)
 	else:
 		accounts_dict = {}
@@ -56,39 +56,50 @@ def new_account_entry(accounts_dict):
 					salt = os.urandom(32)
 					key = hashlib.pbkdf2_hmac("sha256", new_password.encode("utf-8"), salt, 100000)
 					accounts_dict[new_username] = {"salt": salt, "key": key}
-					with open("accounts.pickle", "wb") as accounts:
+					with open("accounts.bin", "wb") as accounts:
 						pickle.dump(accounts_dict, accounts)
 					running = False
+					cls()
+					print("Account created\n")
 				else:
 					cls()
 					print("Passwords didn't match\n")
-cls()
-attempts = 0
-while attempts < 3:
-	accounts_dict = accounts()
-	if os.path.isfile("accounts.pickle") == False:
-		new_account_entry(accounts_dict)
-	print("Please enter your user name. If you need to create an account, enter 'new_account'\nType 'quit' to quit.")
-	user_login = input("\nUsername: ")
-	if user_login == "quit":
-		attempts = 3
-	elif user_login == "new_account":
-		new_account_entry(accounts_dict)
-	elif user_login in accounts_dict.keys():
-		cls()
-		print("Hello {}! Please enter your password.\nAttempt {}/3".format(user_login, attempts))
-		user_password = getpass.getpass("\nPassword: ")
-		salt = accounts_dict[user_login]["salt"]
-		key = accounts_dict[user_login]["key"]
-		new_key = hashlib.pbkdf2_hmac("sha256", user_password.encode("utf-8"), salt, 100000)
-		if key == new_key:
-			cls()
-			print("Welcome {}! You have succesfully authenticated!".format(user_login))
-			attempts = 3
+					
+def main():
+	cls()
+	running = True
+	while running == True:
+		accounts_dict = accounts()
+		if os.path.isfile("accounts.bin") == False:
+			new_account_entry(accounts_dict)
+		print("Please enter your user name. If you need to create an account, enter 'new_account'\nType 'quit' to quit.")
+		user_login = input("\nUsername: ")
+		if user_login == "quit":
+			running = False
+		elif user_login == "new_account":
+			new_account_entry(accounts_dict)
+		elif user_login in accounts_dict.keys():
+			attempts = 0
+			while attempts < 3:
+				cls()
+				print("Hello {}! Please enter your password.\nAttempt {}/3".format(user_login, attempts))
+				user_password = getpass.getpass("\nPassword: ")
+				salt = accounts_dict[user_login]["salt"]
+				key = accounts_dict[user_login]["key"]
+				new_key = hashlib.pbkdf2_hmac("sha256", user_password.encode("utf-8"), salt, 100000)
+				if key == new_key:
+					cls()
+					print("Welcome {}! You have succesfully authenticated!".format(user_login))
+					break
+				else:
+					cls()
+					print("Incorrect password. Try again.\n")
+					attempts += 1
+			if attempts == 3:
+				cls()
+				print("Too many incorrect attempts.")
+			running = False
 		else:
 			cls()
-			print("Incorrect password. Try again.\n")
-			attempts += 1
-	else:
-		cls()
-		print("{} not found.\n".format(user_login))
+			print("{} not found.\n".format(user_login))
+main()
