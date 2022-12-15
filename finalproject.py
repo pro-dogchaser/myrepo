@@ -25,15 +25,10 @@ def usage_stats(results):
     for result in results:
         if result[2] not in users.keys():
             users[result[2]] = {"INFO": 0, "ERROR": 0}
-            if result[0] == "INFO":
-                users[result[2]]["INFO"] += 1
-            elif result[0] == "ERROR":
-                users[result[2]]["ERROR"] += 1
-        else:
-            if result[0] == "INFO":
-                users[result[2]]["INFO"] += 1
-            elif result[0] == "ERROR":
-                users[result[2]]["ERROR"] += 1
+        elif result[0] == "INFO":
+            users[result[2]]["INFO"] += 1
+        elif result[0] == "ERROR":
+            users[result[2]]["ERROR"] += 1
     return  sorted(users.items())
 
 def write_errors(error_path, errors):
