@@ -20,9 +20,6 @@ def game_over():
 		running = True
 	return running
 
-def cls():
-	os.system('clear')
-
 running = True
 while running==True:
 	if running == False:
